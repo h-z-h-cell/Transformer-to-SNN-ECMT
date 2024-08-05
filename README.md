@@ -154,5 +154,3 @@ and run 'python fintune_model.py' on terminal
 ​		***reset_net：***Reset all modules in the model
 
 ​		***BaseMonitor，SOPMonitor：***Monitor fire rate and calculate energy consumption
-
-**4.6 trans_utils.py :**
