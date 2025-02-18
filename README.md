@@ -108,15 +108,19 @@ python run_class_finetuning.py --eval_data_path your_data_path --nb_classes clas
 **eg. Command to test ViT-S/16 on cifar10**
 
 ```
-1.download model ViTS/16 on Imagenet dataset
-2.set correspongding variable in fintune_model.py
+1. download model ViTS/16 on Imagenet dataset
+2. set correspongding variable in fintune_model.py
 	model_path = '../models/vit_small_patch16_224.pth'
 	model_name = 'vit_small_patch16_224_cifar10'
 	save_model_name = 'vit_small_patch16_224_cifar10_'+str(i)
 and run 'python fintune_model.py' on terminal
 3. choose the best model rename as 'vit_tiny_patch16_224_cifar10_test64_best.pth'
-4. run the following command to get model with threshold : "python run_class_finetuning.py --eval_data_path ../datasets --nb_classes 10 --data_set CIFAR10 --model vit_tiny_patch16_224_cifar10 --model_path ../models/vit_tiny_patch16_224_cifar10_test64_best.pth --input_size 224 --batch_size 64 --test_mode for_v --savename vit_tiny_cifar10_for_v"
-5. run the following command to get test result on CIFAR10: "python run_class_finetuning.py --eval_data_path ../datasets --nb_classes 10 --data_set CIFAR10 --model vit_tiny_patch16_224_cifar10 --model_path ../models/vit_tiny_cifar10_for_v.pth --input_size 224 --batch_size 64 --test_mode snn --test_T 10"
+
+4. run the following command to test ann: "python run_class_finetuning.py --eval_data_path ../datasets --nb_classes 10 --data_set CIFAR10 --model vit_small_patch16_224_cifar10 --model_path ../models/vit_small_patch16_224_cifar10_test64_best.pth --input_size 224 --batch_size 64 --test_mode ann"
+
+5. run the following command to get model with threshold : "python run_class_finetuning.py --eval_data_path ../datasets --nb_classes 10 --data_set CIFAR10 --model vit_small_patch16_224_cifar10 --model_path ../models/vit_small_patch16_224_cifar10_test64_best.pth --input_size 224 --batch_size 64 --test_mode for_v --savename vit_tiny_cifar10_for_v"
+
+6. run the following command to get test result on CIFAR10: "python run_class_finetuning.py --eval_data_path ../datasets --nb_classes 10 --data_set CIFAR10 --model vit_small_patch16_224_cifar10 --model_path ../models/vit_small_cifar10_for_v.pth --input_size 224 --batch_size 64 --test_mode snn --test_T 10"
 ```
 
 
