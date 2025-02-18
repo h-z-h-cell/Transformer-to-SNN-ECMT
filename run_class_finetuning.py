@@ -8,7 +8,6 @@ from datasets import build_dataset
 from engine_for_finetuning import evaluate,evaluate_snn
 import utils
 import trans_utils
-import model_eva
 import model_vit
 def get_args():
     parser = argparse.ArgumentParser()
