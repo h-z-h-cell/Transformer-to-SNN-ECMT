@@ -109,14 +109,6 @@ class Attention(nn.Module):
         head_dim = dim // num_heads
         self.scale = qk_scale or head_dim ** -0.5
         self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
-        if qkv_bias:
-            all_head_dim = head_dim * self.num_heads
-            self.qkv.bias = nn.Parameter(torch.zeros(all_head_dim*3))
-            self.q_bias = nn.Parameter(torch.zeros(all_head_dim))
-            self.v_bias = nn.Parameter(torch.zeros(all_head_dim))
-        else:
-            self.q_bias = None
-            self.v_bias = None
         self.attn_drop = nn.Dropout(attn_drop_ratio)
         self.proj = nn.Linear(dim, dim)
         self.proj_drop = nn.Dropout(proj_drop_ratio)
@@ -132,9 +124,6 @@ class Attention(nn.Module):
         self.x_out_test = MyTestPlace(place = 'fc_out')
 
     def forward(self, x):
-        
-        if self.q_bias is not None:
-            self.qkv.bias = nn.Parameter(torch.cat((self.q_bias, torch.zeros_like(self.v_bias, requires_grad=False), self.v_bias)))
         # [batch_size, num_patches + 1, total_embed_dim]
         B, N, C = x.shape
         # qkv(): -> [batch_size, num_patches + 1, 3 * total_embed_dim]
@@ -210,7 +199,7 @@ class VisionTransformer(nn.Module):
                  embed_dim=768, depth=12, num_heads=12, mlp_ratio=4.0, qkv_bias=True,
                  qk_scale=None, representation_size=None, distilled=False, drop_ratio=0.,
                  attn_drop_ratio=0., drop_path_ratio=0., embed_layer=PatchEmbed, norm_layer=None,
-                 act_layer=None,use_mean_pooling=False):
+                 act_layer=None):
         """
         Args:
             img_size (int, tuple): input image size
@@ -267,8 +256,7 @@ class VisionTransformer(nn.Module):
             for i in range(depth)
         ])
 
-        self.norm = nn.Identity() if use_mean_pooling else norm_layer(embed_dim)
-        self.fc_norm = norm_layer(embed_dim) if use_mean_pooling else None
+        self.norm = norm_layer(embed_dim)
         # Representation layer
         if representation_size and not distilled:
             self.has_logits = True
@@ -309,15 +297,11 @@ class VisionTransformer(nn.Module):
         x = self.blocks(x)
         x = self.norm(x)
         if self.dist_token is None:
-            if self.fc_norm is not None:
-                t = x[:, 1:, :]
-                return self.fc_norm(t.mean(1))
-            else:
-                return self.pre_logits(x[:, 0])
+            return self.pre_logits(x[:, 0])
         else:
             return x[:, 0], x[:, 1]
 
-    def forward(self, x, T=1):
+    def forward(self, x,T=1):
         x2 = None
         x2_list = []
         for i in range(T):
@@ -596,28 +580,4 @@ def vit_large_patch16_224_cifar100(pretrained = False,num_classes: int = 100,**k
                               num_heads=16,
                               representation_size=None,
                               num_classes=num_classes)
-    return model
-
-def _cfg(url='', **kwargs):
-    return {
-        'url': url,
-        'num_classes': 1000, 'input_size': (3, 224, 224), 'pool_size': None,
-        'crop_pct': .9, 'interpolation': 'bicubic',
-        'mean': (0.5, 0.5, 0.5), 'std': (0.5, 0.5, 0.5),
-        **kwargs
-    }
-
-@register_model
-def eva_g_patch14(pretrained=False,num_classes: int = 1000, **keywords):
-    model = VisionTransformer(img_size=336,
-                              patch_size=14,
-                              embed_dim=1408,
-                              depth=40,
-                              num_heads=16,
-                              mlp_ratio=6144 / 1408,
-                              qkv_bias=True,
-                              representation_size=None,
-                              use_mean_pooling=True,
-                              num_classes=num_classes)
-    model.default_cfg = _cfg()
     return model
